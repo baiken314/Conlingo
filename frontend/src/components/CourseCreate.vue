@@ -72,8 +72,8 @@ export default {
             }
             // save updated fields to the course
             else {
-                this.course.name = this.courseName;
-                this.course.description = this.description;
+                // this.course.name = this.courseName;
+                // this.course.description = this.description;
 
                 console.log('Sending update course to server', toRaw(this.course));
 

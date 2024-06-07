@@ -1,12 +1,7 @@
 <template>
-    <div id="app">
-        <p><i>Conlingo TEST</i></p>
+    <div id="app" class="content">
         <UserLogin v-if="!user" :user="user" @user-update="handleUserUpdate" />
         <div v-if="user">
-            <UserInfo v-if="user" :user="user" 
-                @go-to-learn="mode = 'learn'; goToCourseList()"
-                @go-to-create="mode = 'create'; goToCourseList()"
-                @user-update="handleUserUpdate"/>
             <CourseList 
                 v-if="state == 'courseList'" 
                 :courses="courses" 
@@ -16,10 +11,18 @@
             <ModuleList v-if="state == 'moduleList'" :course="selectedCourse" 
                 @go-to-course-list="goToCourseList"
                 @module-clicked="handleModuleClicked" />
-            <LessonComponent ref="lesson" v-if="state == 'lesson'" :lesson="currentLesson"
+            <LessonComponent ref="lesson" v-if="state == 'lesson'" :lesson="selectedLesson"
                 @back-to-course="backToCourse" />
             <CourseCreate v-if="state == 'courseCreate'" :course="selectedCourse" @update-course="handleCourseUpdate" />
         </div>
+        <footer class="footer">
+            <div class="content has-text-centered">
+                <p>
+                    <strong>Conlingo</strong> by <a href="https://bradleyaiken.com">Bradley Aiken</a>. 
+                    The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
+                </p>
+            </div>
+        </footer>
     </div>
 </template>
 
@@ -31,8 +34,8 @@ axios.defaults.headers.common['Content-Type'] = 'multipart/form-data';
 import CourseCreate from './components/CourseCreate.vue';
 import CourseList from './components/CourseList.vue';
 import ModuleList from './components/ModuleList.vue';
+import NavbarComponent from './components/NavbarComponent.vue';
 import LessonComponent from './components/LessonComponent.vue';
-import UserInfo from './components/UserInfo.vue';
 import UserLogin from './components/UserLogin.vue';
 
 export default {
@@ -40,22 +43,23 @@ export default {
     components: {
         CourseCreate,
         CourseList,
-        ModuleList,
         LessonComponent,
-        UserInfo,
+        ModuleList,
+        NavbarComponent,
         UserLogin
     },
     data() {
         return {
-            user: null,
             mode: 'learn',
+            state: 'courseList',
+            user: null,
             courses: [],
             selectedCourse: null,
+            modules: [],
             selectedModule: null,
-            currentLessons: null,
-            currentLesson: null,
-            currentEntries: null,
-            state: "courseList"
+            lessons: [],
+            selectedLesson: null,
+            entries: null,
         };
     },
     mounted() {
@@ -76,11 +80,10 @@ export default {
             this.selectedCourse = course;
             this.state = "moduleList";
 
-            // Fetch Entires for selected Course
             axios.get(`https://conlingo-api.cake.builders/entries/course/${toRaw(course)._id}`)
                 .then(response => {
                     console.log('Entries:', response.data);
-                    this.currentEntries = response.data;
+                    this.entries = response.data;
                 })
                 .catch(error => {
                     console.error('Error fetching entries:', error);
@@ -97,9 +100,9 @@ export default {
             console.log('Selected module:', module, 'Module ID:', moduleId);
             axios.get(`https://conlingo-api.cake.builders/modules/${moduleId}/lessons`)
                 .then(response => {
-                    this.currentLessons = response.data;
-                    this.currentLesson = this.currentLessons[0];
-                    console.log('Current lesson:', this.currentLesson);
+                    this.lessons = response.data;
+                    this.selectedLesson = this.lessons[0];
+                    console.log('Current lesson:', this.selectedLesson);
                 })
                 .catch(error => {
                     console.error('Error fetching lessons:', error);
@@ -133,14 +136,3 @@ export default {
     }
 };
 </script>
-
-<style>
-#app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
-}
-</style>
