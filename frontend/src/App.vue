@@ -1,28 +1,47 @@
 <template>
     <div id="app" class="content">
-        <UserLogin v-if="!user" :user="user" @user-update="handleUserUpdate" />
-        <div v-if="user">
-            <CourseList 
-                v-if="state == 'courseList'" 
-                :courses="courses" 
-                :mode="mode" 
-                @course-clicked="handleCourseClicked"
-                @go-to-course-create="goToCourseCreate" />
-            <ModuleList v-if="state == 'moduleList'" :course="selectedCourse" 
-                @go-to-course-list="goToCourseList"
-                @module-clicked="handleModuleClicked" />
-            <LessonComponent ref="lesson" v-if="state == 'lesson'" :lesson="selectedLesson"
-                @back-to-course="backToCourse" />
-            <CourseCreate v-if="state == 'courseCreate'" :course="selectedCourse" @update-course="handleCourseUpdate" />
-        </div>
-        <footer class="footer">
-            <div class="content has-text-centered">
-                <p>
-                    <strong>Conlingo</strong> by <a href="https://bradleyaiken.com">Bradley Aiken</a>. 
-                    The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
-                </p>
+        <NavbarComponent 
+            :user="user" 
+            @learn-clicked="mode = 'learn'; state = 'courseList'"
+            @create-clicked="mode = 'create'; state = 'courseList'"
+            @logout-clicked="user = null" />
+        <div class="hero is-fullheight">
+            <div class="container">
+                <UserLogin v-if="!user" :user="user" @user-update="user = $event" />
+                <div v-if="user">
+                    <CourseList 
+                        v-if="state == 'courseList'" 
+                        :courses="courses" 
+                        :mode="mode" 
+                        @course-clicked="state = 'moduleList'; selectedCourse = $event"
+                        @go-to-course-create="state = 'courseCreate'; selectedCourse = $event" />
+                    <ModuleList 
+                        v-if="state == 'moduleList'" 
+                        :course="selectedCourse" 
+                        :modules="modules"
+                        @go-to-course-list="state = 'courseList'"
+                        @module-clicked="selectedModule = $event; state = 'lesson'" />
+                    <LessonComponent 
+                        v-if="state == 'lesson'" 
+                        ref="lesson" 
+                        :lesson="selectedLesson"
+                        @back-to-course="state = 'moduleList'" />
+                    <CourseCreate 
+                        v-if="state == 'courseCreate'"
+                        :course="selectedCourse" 
+                        :modules="modules"
+                        @update-course="selectedCourse = $event" />
+                </div>
             </div>
-        </footer>
+            <footer class="footer">
+                <div class="content has-text-centered is-flex-align-items-flex-end mt-auto">
+                    <p>
+                        <strong>Conlingo</strong> by <a href="https://bradleyaiken.com">Bradley Aiken</a>. 
+                        The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
+                    </p>
+                </div>
+            </footer>
+        </div>
     </div>
 </template>
 
@@ -62,76 +81,45 @@ export default {
             entries: null,
         };
     },
-    mounted() {
-        this.loadCourses();
+    async mounted() {
+        await this.loadCourses();
+    },
+    watch: {
+        async selectedCourse(newCourse) {
+            this.entries = [];
+            this.modules = [];
+            this.lessons = [];
+            if (!newCourse) return;
+
+            console.log('Selected course:', toRaw(newCourse));
+
+            const modulesRequest = await fetch(`https://conlingo-api.cake.builders/modules/course/${toRaw(newCourse)._id}/modules`);
+            this.modules = await modulesRequest.json();
+            const entriesRequest = await fetch(`https://conlingo-api.cake.builders/entries/${toRaw(newCourse)._id}`);
+            this.entries = await entriesRequest.json();
+        },
+        async selectedModule(newModule) {
+            this.lessons = [];
+            if (!newModule) return;
+
+            const lessonsRequest = await fetch(`https://conlingo-api.cake.builders/modules/${newModule._id}/lessons`);
+            this.lessons = await lessonsRequest.json();
+            this.selectedLesson = this.lessons[0];
+        },
+        user(newUser) {
+            document.cookie = newUser ? newUser._id : '';
+        },
+        async state(newState) {
+            if (newState == 'courseList') {
+                await this.loadCourses();
+                this.selectedCourse = null;
+            }
+        }
     },
     methods: {
         async loadCourses() {
-            await axios.get('https://conlingo-api.cake.builders/courses')
-                .then(response => {
-                    console.log('Courses:', response.data);
-                    this.courses = response.data;
-                })
-                .catch(error => {
-                    console.error('Error fetching courses:', error);
-                });
-        },
-        handleCourseClicked(course) {
-            this.selectedCourse = course;
-            this.state = "moduleList";
-
-            axios.get(`https://conlingo-api.cake.builders/entries/course/${toRaw(course)._id}`)
-                .then(response => {
-                    console.log('Entries:', response.data);
-                    this.entries = response.data;
-                })
-                .catch(error => {
-                    console.error('Error fetching entries:', error);
-                });
-        },
-        backToCourse() {
-            console.log('Back to course', this.selectedCourse);
-            this.handleCourseClicked(this.selectedCourse);
-        },
-        handleModuleClicked(module) {
-            let moduleId = toRaw(module._id);
-            this.selectedModule = module;
-            this.state = "lesson";
-            console.log('Selected module:', module, 'Module ID:', moduleId);
-            axios.get(`https://conlingo-api.cake.builders/modules/${moduleId}/lessons`)
-                .then(response => {
-                    this.lessons = response.data;
-                    this.selectedLesson = this.lessons[0];
-                    console.log('Current lesson:', this.selectedLesson);
-                })
-                .catch(error => {
-                    console.error('Error fetching lessons:', error);
-                });
-        },
-        async goToCourseList() {
-            await this.loadCourses();
-            this.selectedCourse = null;
-            this.state = "courseList";
-        },
-        goToCourseCreate(course) {
-            console.log('Go to courseCreate', course);
-            this.state = 'courseCreate';
-            this.selectedCourse = course;
-        },
-        handleUserUpdate(user) {
-            this.user = user;
-            
-            if (!user) { 
-                document.cookie = '';
-            } else {
-                document.cookie = user._id;
-            }
-
-            console.log('User updated:', user);
-        },
-        handleCourseUpdate(course) {
-            this.selectedCourse = course;
-            console.log('Course updated:', course);
+            const coursesRequest = await fetch(`https://conlingo-api.cake.builders/courses`);
+            this.courses = await coursesRequest.json();
         }
     }
 };

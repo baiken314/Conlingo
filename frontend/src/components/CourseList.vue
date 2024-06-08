@@ -1,18 +1,21 @@
 <template>
-    <div class="course-list">
+    <div class="course-list section">
         <h1>{{ title }}</h1>
         <div v-if="courses.length === 0">No courses available</div>
         <div v-if="mode == 'create'">
-            <button v-if="mode === 'create'" @click="handleCreateCourse">Create Course</button>
+            <button class="button is-primary" @click="handleCreateCourse">Create Course</button>
             <br><br>
         </div>
-        <div>
-            <CourseItem 
-                v-for="course in courses" 
-                :key="course._id" 
-                :course="course" 
-                :mode="mode"
-                @course-clicked="handleCourseClicked" />
+        <div class="fixed-grid has-3-cols has-1-cols-mobile">
+            <div class="grid">
+                <CourseItem 
+                    v-for="course in courses" 
+                    class="cell is-col-min-4"
+                    :key="course._id" 
+                    :course="course" 
+                    :mode="mode"
+                    @course-clicked="handleCourseClicked" />
+            </div>
         </div>
     </div>
 </template>
@@ -30,11 +33,7 @@ export default {
     },
     computed: {
         title() {
-            if (this.mode == 'create') {
-                return 'Edit your courses';
-            } else {
-                return 'Course list';
-            }
+            return this.mode == 'create' ? 'Edit your courses' : 'Courses';
         }
     },
     methods: {

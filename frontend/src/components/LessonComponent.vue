@@ -1,36 +1,45 @@
 <template>
-    <div>
-        <button @click="backToCourse">&lt; Back</button>
-        <div>
-            <progress :value="currentIndex + (hasResponded && isResponseCorrect ? 1 : 0)" :max="sentences.length"></progress>
-            <span>{{ currentIndex  + (hasResponded && isResponseCorrect ? 1 : 0) }} / {{ sentences.length }}</span>
+    <div class="section container">
+        <button class="button is-link" @click="$emit('back-to-course')">&lt; Back</button>
+        <div class="section">
+            <div>
+                <progress class="progress is-primary" :value="currentIndex + (hasResponded && isResponseCorrect ? 1 : 0)" :max="sentences.length"></progress>
+                <!-- <span>{{ currentIndex  + (hasResponded && isResponseCorrect ? 1 : 0) }} / {{ sentences.length }}</span> -->
+            </div>
+            <div v-if="currentIndex < sentences.length">
+                <SentenceTranslate ref="sentenceTranslate" :sentence="sentences[currentIndex]" @response="handleResponse" />
+            </div>
+            <button
+                v-show="hasResponded"
+                ref="nextButton"  
+                class="button is-link"
+                @click="nextSentence"
+            >Next</button>
+            <div ref="results" v-if="currentIndex >= sentences.length">
+                <h2>Results</h2>
+                <h3>Percent correct</h3>
+                <p>{{ Math.round((correctSentences.length / sentences.length) * 100) }}%</p>
+                <h3>Time spent</h3>
+                <p>{{ timeSpent }} seconds</p>
+            </div>
+            <br/>
         </div>
-        <div v-if="currentIndex < sentences.length">
-            <SentenceTranslate ref="sentenceTranslate" :sentence="sentences[currentIndex]" @response="handleResponse" />
-        </div>
-        <button ref="nextButton" 
-            @click="nextSentence" 
-            v-if="currentIndex < sentences.length" 
-            :hidden="!hasResponded" 
-            :disabled="!hasResponded"
-        >Next</button>
-        <div ref="results" v-if="currentIndex >= sentences.length">
-            <h2>Results</h2>
-            <h3>Percent correct</h3>
-            <p>{{ Math.round((correctSentences.length / sentences.length) * 100) }}%</p>
-            <h3>Time spent</h3>
-            <p>{{ timeSpent }} seconds</p>
-        </div>
-        <br/>
     </div>
 </template>
 
-<script>
-import axios from 'axios';
-axios.defaults.headers.common['Content-Type'] = 'multipart/form-data';
+<style>
+    .progress::-webkit-progress-value {
+        transition: width 0.5s ease;
+    }
 
+    .progress::-moz-progress-bar {
+        transition: width 0.5s ease;
+    }
+</style>
+
+<script>
 import SentenceTranslate from './SentenceTranslate.vue';
-import { toRaw } from 'vue';
+import { nextTick, toRaw } from 'vue';
 
 export default {
     components: {
@@ -61,8 +70,17 @@ export default {
         this.beginTime = new Date();
     },
     watch: {
-        lesson() {
-            this.loadSentences();
+        async lesson() {
+            let sentenceResponse = await fetch(`https://conlingo-api.cake.builders/lessons/${toRaw(this.lesson)._id}/sentences`);
+            this.sentences = await sentenceResponse.json();
+        },
+        hasResponded(newValue) {
+            console.log(newValue);
+            if (newValue == true) {
+                nextTick(() => {
+                    this.$refs.nextButton.focus();
+                });
+            }
         }
     },
     methods: {
@@ -82,9 +100,6 @@ export default {
             }
             
             this.hasResponded = true;
-            this.$refs.nextButton.disabled = false;
-            this.$refs.nextButton.hidden = false;
-            this.$refs.nextButton.focus();
 
             // get end time
             if (this.currentIndex + 1 === this.sentences.length) {
@@ -109,22 +124,6 @@ export default {
             this.$refs.sentenceTranslate.showFeedback = false;
             this.$refs.sentenceTranslate.userInput = null;
             this.$refs.sentenceTranslate.focusUserInput();
-        },
-        loadSentences() {
-            // Load sentences from the server
-            console.log('Loading sentences for lesson:', this.lesson._id);
-            let lessonId = toRaw(this.lesson)._id
-            axios.get(`https://conlingo-api.cake.builders/lessons/${lessonId}/sentences`)
-                .then(response => {
-                    this.sentences = response.data;
-                    console.log('Sentences:', this.sentences);
-                })
-                .catch(error => {
-                    console.error('Error fetching sentences:', error);
-                });
-        },
-        backToCourse() {
-            this.$emit('back-to-course');
         }
     }
 };

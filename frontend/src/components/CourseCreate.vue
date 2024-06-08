@@ -2,14 +2,14 @@
     <div>
         <h1>{{ title }}</h1>
         <label for="courseName">Course Name:</label>
-        <input type="text" id="courseName" v-model="courseName" required>
+        <input type="text" id="courseName" v-model="updatedCourse.name" required>
         <br>
         <label for="description">Description:</label>
-        <textarea id="description" v-model="description" required></textarea>
+        <textarea id="description" v-model="updatedCourse.description" required></textarea>
         <br>
         <button type="button" @click="saveCourse">{{ course ? 'Save Course' : 'Create Course' }}</button>
         <div v-if="course">
-            <ModuleList :course="course" :mode="'create'" />
+            <ModuleList :course="course" :mode="'create'" :modules="modules" />
         </div>
     </div>
 </template>
@@ -24,12 +24,12 @@ export default {
     },
     data() {
         return {
-            courseName: '',
-            description: ''
+            updatedCourse: this.course
         };
     },
     props: {
-        course: Object
+        course: Object,
+        modules: Array[Object]
     },
     watch: {
         course: {
@@ -66,24 +66,20 @@ export default {
                         userId: document.cookie
                     })
                 });
+
                 const course = await courseCreateRequest.json();
                 console.log('Created course: ', course);
                 this.$emit('update-course', course);
             }
             // save updated fields to the course
             else {
-                // this.course.name = this.courseName;
-                // this.course.description = this.description;
-
-                console.log('Sending update course to server', toRaw(this.course));
-
                 const courseUpdateRequest = await fetch('https://conlingo-api.cake.builders/courses/update', {
                     method: "POST",
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(toRaw(this.course))
+                    body: JSON.stringify(toRaw(this.updatedCourse))
                 });
 
                 const course = await courseUpdateRequest.json()

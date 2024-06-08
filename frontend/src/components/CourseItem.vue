@@ -1,11 +1,15 @@
 <template>
-    <div v-if="isVisible" class="course-item" @click="courseClicked">
-        <div class="course-content">
-            <h2>{{ course.name }}</h2>
-            <div v-html="course.description"></div>
+    <div v-if="isVisible" class="course-item card is-clickable" @click="courseClicked">
+        <div class="card-content">
+            <div class="content">
+                <div class="course-content">
+                    <h4>{{ course.name }}</h4>
+                    <p>{{ course.description }}</p>
+                </div>
+                <div class="module-count">{{ course.modules.length }} Modules</div>
+                <div v-if="course.createdBy" class="module-count">Created by {{ course.createdBy.username }} </div>
+            </div>
         </div>
-        <div class="module-count">{{ course.modules.length }} Modules</div>
-        <div v-if="course.createdBy" class="module-count">Created by {{ course.createdBy.username }} </div>
     </div>
 </template>
 
@@ -31,22 +35,15 @@
 <style scoped>
 .course-item {
     cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    transition: background-color 0.3s ease;
-    width: 300px; /* Adjust the width as needed */
-    margin: 0 auto; /* Center the cards horizontally */
-    margin-bottom: 10px;
+    transition: background-color 0.3s ease, scale 0.3s ease;
+}
+
+.course-item:last-child {
+    margin-bottom: auto;
 }
 
 .course-item:hover {
-    background-color: #f0f0f0;    
-}
-
-.course-content {
-    margin-bottom: 5px;
+    scale: 1.025;
 }
 
 .module-count {
