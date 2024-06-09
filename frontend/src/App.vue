@@ -1,40 +1,44 @@
 <template>
     <div id="app" class="content">
         <NavbarComponent 
-            :user="user" 
+            :user="user"
             @learn-clicked="mode = 'learn'; state = 'courseList'"
             @create-clicked="mode = 'create'; state = 'courseList'"
             @logout-clicked="user = null" />
-        <div class="hero is-fullheight">
-            <div class="container">
-                <UserLogin v-if="!user" :user="user" @user-update="user = $event" />
-                <div v-if="user">
-                    <CourseList 
-                        v-if="state == 'courseList'" 
-                        :courses="courses" 
-                        :mode="mode" 
-                        @course-clicked="state = 'moduleList'; selectedCourse = $event"
-                        @go-to-course-create="state = 'courseCreate'; selectedCourse = $event" />
-                    <ModuleList 
-                        v-if="state == 'moduleList'" 
-                        :course="selectedCourse" 
-                        :modules="modules"
-                        @go-to-course-list="state = 'courseList'"
-                        @module-clicked="selectedModule = $event; state = 'lesson'" />
-                    <LessonComponent 
-                        v-if="state == 'lesson'" 
-                        ref="lesson" 
-                        :lesson="selectedLesson"
-                        @back-to-course="state = 'moduleList'" />
-                    <CourseCreate 
-                        v-if="state == 'courseCreate'"
-                        :course="selectedCourse" 
-                        :modules="modules"
-                        @update-course="selectedCourse = $event" />
+        <div class="flex-container">
+            <div class="main-content">
+                <div class="hero">
+                    <div class="container">
+                        <UserLogin v-if="!user" :user="user" @user-update="user = $event" />
+                        <div v-if="user">
+                            <CourseList 
+                                v-if="state == 'courseList'" 
+                                :courses="courses" 
+                                :mode="mode" 
+                                @course-clicked="state = 'moduleList'; selectedCourse = $event"
+                                @go-to-course-create="state = 'courseCreate'; selectedCourse = $event" />
+                            <ModuleList 
+                                v-if="state == 'moduleList'" 
+                                :course="selectedCourse" 
+                                :modules="modules"
+                                @go-to-course-list="state = 'courseList'"
+                                @module-clicked="selectedModule = $event; state = 'lesson'" />
+                            <LessonComponent 
+                                v-if="state == 'lesson'" 
+                                ref="lesson" 
+                                :lesson="selectedLesson"
+                                @back-to-course="state = 'moduleList'" />
+                            <CourseCreate 
+                                v-if="state == 'courseCreate'"
+                                :course="selectedCourse" 
+                                :modules="modules"
+                                @update-course="selectedCourse = $event" />
+                        </div>
+                    </div>
                 </div>
             </div>
             <footer class="footer">
-                <div class="content has-text-centered is-flex-align-items-flex-end mt-auto">
+                <div class="content has-text-centered">
                     <p>
                         <strong>Conlingo</strong> by <a href="https://bradleyaiken.com">Bradley Aiken</a>. 
                         The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
@@ -44,6 +48,28 @@
         </div>
     </div>
 </template>
+
+<style>
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.main-content {
+    flex-grow: 1;
+}
+
+.footer {
+    flex-shrink: 0;
+}
+</style>
 
 <script>
 import { toRaw } from 'vue';
@@ -107,7 +133,9 @@ export default {
             this.selectedLesson = this.lessons[0];
         },
         user(newUser) {
-            document.cookie = newUser ? newUser._id : '';
+            console.log(`Setting new user data: ${newUser}`);
+            document.cookie = newUser ? newUser._id : 'null';
+            console.log(`New document.cookie: ${document.cookie}`);
         },
         async state(newState) {
             if (newState == 'courseList') {

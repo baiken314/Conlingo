@@ -24,7 +24,7 @@ export default {
     },
     data() {
         return {
-            updatedCourse: this.course
+            updatedCourse: {}
         };
     },
     props: {

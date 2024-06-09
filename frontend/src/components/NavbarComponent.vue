@@ -13,14 +13,14 @@
         </div>
         <div v-if="user" class="navbar-menu" :class="{ 'is-active': isMobileActive }">
             <div class="navbar-start">
-                <a class="navbar-item" @click="$emit('learn-clicked')">Learn</a>
-                <a class="navbar-item" @click="$emit('create-clicked')">Create</a>
+                <a class="navbar-item" @click="$emit('learn-clicked'); isMobileActive = false;">Learn</a>
+                <a class="navbar-item" @click="$emit('create-clicked'); isMobileActive = false;">Create</a>
                 <a class="navbar-item">Community</a>
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-danger" @click="$emit('logout-clicked')">Log out</a>
+                        <a class="button is-danger" @click="$emit('logout-clicked'); isMobileActive = false;">Log out</a>
                     </div>
                 </div>
             </div>

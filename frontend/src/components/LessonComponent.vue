@@ -1,29 +1,27 @@
 <template>
     <div class="section container">
-        <button class="button is-link" @click="$emit('back-to-course')">&lt; Back</button>
-        <div class="section">
-            <div>
-                <progress class="progress is-primary" :value="currentIndex + (hasResponded && isResponseCorrect ? 1 : 0)" :max="sentences.length"></progress>
-                <!-- <span>{{ currentIndex  + (hasResponded && isResponseCorrect ? 1 : 0) }} / {{ sentences.length }}</span> -->
-            </div>
-            <div v-if="currentIndex < sentences.length">
-                <SentenceTranslate ref="sentenceTranslate" :sentence="sentences[currentIndex]" @response="handleResponse" />
-            </div>
-            <button
-                v-show="hasResponded"
-                ref="nextButton"  
-                class="button is-link"
-                @click="nextSentence"
-            >Next</button>
-            <div ref="results" v-if="currentIndex >= sentences.length">
-                <h2>Results</h2>
-                <h3>Percent correct</h3>
-                <p>{{ Math.round((correctSentences.length / sentences.length) * 100) }}%</p>
-                <h3>Time spent</h3>
-                <p>{{ timeSpent }} seconds</p>
-            </div>
-            <br/>
+        <div>
+            <progress class="progress is-primary" :value="currentIndex + (hasResponded && isResponseCorrect ? 1 : 0)" :max="sentences.length"></progress>
+            <!-- <span>{{ currentIndex  + (hasResponded && isResponseCorrect ? 1 : 0) }} / {{ sentences.length }}</span> -->
         </div>
+        <div v-if="currentIndex < sentences.length">
+            <SentenceTranslate ref="sentenceTranslate" :sentence="sentences[currentIndex]" @response="handleResponse" />
+        </div>
+        <button
+            v-show="hasResponded"
+            ref="nextButton"  
+            class="button is-link"
+            @click="nextSentence"
+        >Next</button>
+        <br/>
+    </div>
+    <div class="section container" ref="results" v-if="currentIndex >= sentences.length">
+        <h2>Results</h2>
+        <h3>Percent correct</h3>
+        <p>{{ Math.round((correctSentences.length / sentences.length) * 100) }}%</p>
+        <h3>Time spent</h3>
+        <p>{{ timeSpent }} seconds</p>
+        <button class="button is-link" @click="$emit('back-to-course')">&lt; Back</button>
     </div>
 </template>
 

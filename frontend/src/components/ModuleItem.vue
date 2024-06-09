@@ -2,9 +2,9 @@
     <div class="module-item card is-clickable" @click="$emit('module-clicked', module)">
         <div class="card-content">
             <div class="content">
-                <h2>{{ module.name }}</h2>
+                <h4>{{ module.name }}</h4>
                 <div v-html="module.description"></div>
-                <div class="lesson-count">{{ module.lessons.length }} Lessons</div>
+                <div class="lesson-count">{{ module.lessons ? module.lessons.length : '0' }} Lessons</div>
                 <div v-if="mode == 'create'">
                     <button type="button" @click="editModule">Edit</button>
                     <button type="button" @click="deleteModule">Delete</button>

@@ -64,9 +64,8 @@ exports.getSentencesByLessonId = async (req, res) => {
             path: 'sentences',
             options: { virtuals: true }
         });
-        if (!lesson) {
-            return res.status(404).json({ message: 'Lesson not found' });
-        }
+
+        if (!lesson) return res.status(404).json({ message: 'Lesson not found' });
 
         let lessonObj = JSON.parse(JSON.stringify(lesson));
 
@@ -84,7 +83,7 @@ exports.getSentencesByLessonId = async (req, res) => {
                     }
                     targetHoverWords[entryWord] = entry.translation;
                 } else {
-                    targetHoverWords[entryWord] = "NA";
+                    targetHoverWords[entryWord] = "N/A";
                 }
                 console.log(targetHoverWords);
             }
@@ -109,10 +108,8 @@ const getWordsFromText = (text) => {
 
         if (char === '(') {
             inParentheses = true;
-            // currentWord += char;
         } else if (char === ')') {
             inParentheses = false;
-            // currentWord += char;
             words.push(currentWord);
             currentWord = '';
         } else if (char === ' ' && !inParentheses) {

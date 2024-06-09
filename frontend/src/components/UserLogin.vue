@@ -60,9 +60,8 @@ export default {
         user: Object
     },
     async mounted() {
-        // Check if user is already logged in
-        if (document.cookie) {
-            console.log('User is already logged in');
+        if (document.cookie && document.cookie != 'null') {
+            console.log(`User is already logged in: ${document.cookie}`);
 
             const userSessionRequest = await fetch(`https://conlingo-api.cake.builders/user-session/${document.cookie}`);
             const user = await userSessionRequest.json()
