@@ -13,6 +13,7 @@ exports.getAllModules = async (req, res) => {
 };
 
 exports.createModule = async (req, res) => {
+    console.log('createModule');
     const module = new Module({
         name: req.body.name,
         description: req.body.description,
@@ -40,6 +41,7 @@ exports.getModuleById = async (req, res) => {
 };
 
 exports.updateModule = async (req, res) => {
+    console.log('call updateModule');
     try {
         const updatedModule = await Module.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedModule) {

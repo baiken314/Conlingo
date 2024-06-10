@@ -1,25 +1,22 @@
 <template>
-    <div class="container">
-        <div class="section">
-            <div v-if="mode == 'learn'">
-                <h1>{{ course.name }}</h1>
-                <div>{{ course.description }}</div>
-            </div>
-        </div>
+    <div v-if="mode == 'learn'" class="section">
+        <h1 class="title">{{ course.name }}</h1>
+        <div>{{ course.description }}</div>
     </div>
     <div class="section pt-0">
         <h2>Modules</h2>
         <div v-if="loading">Loading modules...</div>
-        <div v-else-if="modules.length === 0">No modules available</div>
+        <div v-else-if="modules.length === 0">No modules available.</div>
         <div v-else>
             <ModuleItem 
                 v-for="moduleItem in modules" 
                 @module-clicked="$emit('module-clicked', $event)" 
+                :mode="mode"
                 :key="moduleItem._id" 
                 :module="moduleItem" />
         </div>
         <div v-if="mode == 'create'">
-            <button type="button" @click="createNewModule">Create Module</button>
+            <button class="button is-primary mt-4" type="button" @click="createNewModule">Create Module</button>
         </div>
     </div>
 </template>
@@ -43,6 +40,20 @@ export default {
         return {
             loading: false,
         };
+    },
+    methods: {
+        async createNewModule() {
+            const moduleCreateRequest = await fetch(`https://conlingo-api.cake.builders/courses/${this.course._id}/addModule`, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const course = await moduleCreateRequest.json();
+            this.$emit('update-course', course);
+        }
     }
 };
 </script>

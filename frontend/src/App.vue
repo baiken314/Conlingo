@@ -22,7 +22,7 @@
                                 :course="selectedCourse" 
                                 :modules="modules"
                                 @go-to-course-list="state = 'courseList'"
-                                @module-clicked="selectedModule = $event; state = 'lesson'" />
+                                @module-clicked="state = 'lesson'; selectedModule = $event" />
                             <LessonComponent 
                                 v-if="state == 'lesson'" 
                                 ref="lesson" 
@@ -32,7 +32,15 @@
                                 v-if="state == 'courseCreate'"
                                 :course="selectedCourse" 
                                 :modules="modules"
-                                @update-course="selectedCourse = $event" />
+                                @update-course="selectedCourse = $event"
+                                @delete-course="state = 'courseList'; selectedCourse = null"
+                                @module-clicked="state = 'moduleCreate'; selectedModule = $event" />
+                            <ModuleCreate 
+                                v-if="state == 'moduleCreate'"
+                                :course="selectedCourse"
+                                :module="selectedModule"
+                                @update-module="selectedModule = $event"
+                                @delete-module="state = 'courseCreate'; selectedModule = null" />
                         </div>
                     </div>
                 </div>
@@ -78,6 +86,7 @@ axios.defaults.headers.common['Content-Type'] = 'multipart/form-data';
 
 import CourseCreate from './components/CourseCreate.vue';
 import CourseList from './components/CourseList.vue';
+import ModuleCreate from './components/ModuleCreate.vue'
 import ModuleList from './components/ModuleList.vue';
 import NavbarComponent from './components/NavbarComponent.vue';
 import LessonComponent from './components/LessonComponent.vue';
@@ -89,6 +98,7 @@ export default {
         CourseCreate,
         CourseList,
         LessonComponent,
+        ModuleCreate,
         ModuleList,
         NavbarComponent,
         UserLogin

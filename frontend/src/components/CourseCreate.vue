@@ -1,16 +1,31 @@
 <template>
-    <div>
-        <h1>{{ title }}</h1>
-        <label for="courseName">Course Name:</label>
-        <input type="text" id="courseName" v-model="updatedCourse.name" required>
-        <br>
-        <label for="description">Description:</label>
-        <textarea id="description" v-model="updatedCourse.description" required></textarea>
-        <br>
-        <button type="button" @click="saveCourse">{{ course ? 'Save Course' : 'Create Course' }}</button>
-        <div v-if="course">
-            <ModuleList :course="course" :mode="'create'" :modules="modules" />
+    <div class="section">
+        <h1 class="title">{{ title }}</h1>
+        <div class="field">
+            <label class="label" for="courseName">Course Name:</label>
+            <div class="control">
+                <input class="input" type="text" id="courseName" v-model="updatedCourse.name" required>
+            </div>
         </div>
+        <div class="field">
+            <label class="label" for="description">Description:</label>
+            <div class="control">
+                <textarea class="textarea" id="description" v-model="updatedCourse.description" required></textarea>
+            </div>
+        </div>
+        <button class="button is-primary" type="button" @click="saveCourse">{{ course ? 'Save Course' : 'Create Course' }}</button>
+    </div>
+    <div v-if="course">
+        <ModuleList 
+            :course="course" 
+            :mode="'create'" 
+            :modules="modules" 
+            @update-course="$emit('update-course', $event)"
+            @module-clicked="$emit('module-clicked', $event)" />
+    </div>
+    <div class="section pt-0">
+        <h2>Danger Zone</h2>
+        <button class="button is-danger" type="button" @click="deleteCourse">Delete Course</button>
     </div>
 </template>
 
@@ -24,7 +39,7 @@ export default {
     },
     data() {
         return {
-            updatedCourse: {}
+            updatedCourse: this.course || {}
         };
     },
     props: {
@@ -47,7 +62,7 @@ export default {
     },
     computed: {
         title() {
-            return this.course ? 'Edit Course' : 'Create Course';
+            return this.course ? `Edit Course - ${this.course.name}` : 'Create Course';
         }
     },
     methods: {
@@ -61,8 +76,8 @@ export default {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        name: this.courseName,
-                        description: this.description,
+                        name: this.updatedCourse.name,
+                        description: this.updatedCourse.description,
                         userId: document.cookie
                     })
                 });
@@ -86,6 +101,18 @@ export default {
                 console.log('Updated course: ', course);
                 this.$emit('update-course', course);
             }
+        },
+        async deleteCourse() {
+            if (confirm('Are you sure you want to delete this course?') == false) return;
+
+            await fetch(`https://conlingo-api.cake.builders/courses/${this.course._id}`, {
+                method: "DELETE",
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+
+            this.$emit('delete-course');
         }
     }
 };

@@ -70,7 +70,10 @@ exports.addModuleToCourse = async (req, res) => {
             return res.status(404).json({ message: 'Course not found' });
         }
 
-        const module = new Module(req.body);
+        const module = new Module({
+            name: 'New module',
+            description: 'Description here'
+        });
         await module.save();
 
         course.modules.push(module);

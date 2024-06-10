@@ -6,7 +6,7 @@ const moduleController = require('../controllers/moduleController');
 router.get('/', moduleController.getAllModules);
 router.post('/', moduleController.createModule);
 router.get('/:id', moduleController.getModuleById);
-router.post('/update', moduleController.updateModule);
+router.put('/:id', moduleController.updateModule);
 router.delete('/:id', moduleController.deleteModule);
 router.get('/course/:courseId/modules', moduleController.getModulesByCourseId);
 router.get('/:id/lessons', moduleController.getLessonsByModuleId);

@@ -5,10 +5,6 @@
                 <h4>{{ module.name }}</h4>
                 <div v-html="module.description"></div>
                 <div class="lesson-count">{{ module.lessons ? module.lessons.length : '0' }} Lessons</div>
-                <div v-if="mode == 'create'">
-                    <button type="button" @click="editModule">Edit</button>
-                    <button type="button" @click="deleteModule">Delete</button>
-                </div>
             </div>
         </div>
     </div>
