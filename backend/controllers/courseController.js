@@ -28,7 +28,16 @@ exports.createCourse = async (req, res) => {
 
 exports.getCourseById = async (req, res) => {
     try {
-        const course = await Course.findById(req.params.id).populate('modules');
+        const course = await Course.findById(req.params.id).populate({
+            path: 'modules',
+            populate: {
+                path: 'lessons',
+                populate: [
+                    { path: 'keywords' },
+                    { path: 'sentences' }
+                ]
+            }
+        });
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }

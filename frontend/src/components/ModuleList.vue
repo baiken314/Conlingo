@@ -1,22 +1,51 @@
 <template>
     <div v-if="mode == 'learn'" class="section">
-        <h1 class="title">{{ course.name }}</h1>
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title">{{ course.name }}</h1>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <button class="button is-link" @click="$emit('go-to-course-list')">
+                        <span class="icon is-small">
+                            <i class="fa fa-chevron-left"></i>
+                        </span>
+                        <span>Back</span>
+                    </button>
+                </div>
+            </div>
+        </div>
         <div>{{ course.description }}</div>
     </div>
     <div class="section pt-0">
-        <h2>Modules</h2>
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h2 class="title">Modules</h2>
+                </div>
+            </div>
+            <div v-if="mode == 'create'" class="level-right">
+                <div class="level-item">
+                    <button class="button is-primary" type="button" @click="createNewModule">
+                        <span class="icon is-small">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                        <span>Create Module</span>
+                    </button>
+                </div>
+            </div>
+        </div>
         <div v-if="loading">Loading modules...</div>
-        <div v-else-if="modules.length === 0">No modules available.</div>
+        <div v-else-if="course.modules.length === 0">No modules available.</div>
         <div v-else>
             <ModuleItem 
-                v-for="moduleItem in modules" 
+                v-for="moduleItem in course.modules" 
                 @module-clicked="$emit('module-clicked', $event)" 
                 :mode="mode"
                 :key="moduleItem._id" 
                 :module="moduleItem" />
-        </div>
-        <div v-if="mode == 'create'">
-            <button class="button is-primary mt-4" type="button" @click="createNewModule">Create Module</button>
         </div>
     </div>
 </template>
@@ -27,7 +56,6 @@ import ModuleItem from './ModuleItem.vue';
 export default {
     props: {
         course: Object,
-        modules: Array[Object],
         mode: {
             type: String,
             default: "learn"

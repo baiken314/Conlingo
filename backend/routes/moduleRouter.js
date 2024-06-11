@@ -9,6 +9,7 @@ router.get('/:id', moduleController.getModuleById);
 router.put('/:id', moduleController.updateModule);
 router.delete('/:id', moduleController.deleteModule);
 router.get('/course/:courseId/modules', moduleController.getModulesByCourseId);
+router.post('/:id/addLesson', moduleController.addLesson);
 router.get('/:id/lessons', moduleController.getLessonsByModuleId);
 
 module.exports = router;

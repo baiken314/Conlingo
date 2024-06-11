@@ -102,3 +102,19 @@ exports.getLessonsByModuleId = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.addLesson = async (req, res) => {
+    try {
+        console.log('addLesson to module: ', req.params.id);
+        const module = await Module.findById(req.params.id);
+        const lesson = await new Lesson();
+        const newLesson = await lesson.save();
+        
+        module.lessons.push(newLesson);
+        await module.save();
+
+        res.json(module);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};

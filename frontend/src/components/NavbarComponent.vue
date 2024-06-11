@@ -20,7 +20,12 @@
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-danger" @click="$emit('logout-clicked'); isMobileActive = false;">Log out</a>
+                        <a class="button is-danger" @click="$emit('logout-clicked'); isMobileActive = false;">
+                            <span class="icon is-small">
+                                <i class="fa fa-sign-out"></i>
+                            </span>
+                            <span>Log out</span>
+                        </a>
                     </div>
                 </div>
             </div>

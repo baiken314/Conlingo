@@ -1,6 +1,30 @@
 <template>
     <div class="section">
-        <h1 class="title">{{ title }}</h1>
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title">{{ title }}</h1>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="buttons">
+                        <button class="button is-link" @click="$emit('go-to-course-list')">
+                            <span class="icon is-small">
+                                <i class="fa fa-chevron-left"></i>
+                            </span>
+                            <span>Back</span>
+                        </button>
+                        <button class="button is-primary" type="button" @click="saveCourse">
+                            <span class="icon is-small">
+                                <i class="fa" :class="course ? 'fa-check' : 'fa-plus'"></i>
+                            </span>
+                            <span>{{ course ? 'Save Course' : 'Create Course' }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="field">
             <label class="label" for="courseName">Course Name:</label>
             <div class="control">
@@ -13,19 +37,22 @@
                 <textarea class="textarea" id="description" v-model="updatedCourse.description" required></textarea>
             </div>
         </div>
-        <button class="button is-primary" type="button" @click="saveCourse">{{ course ? 'Save Course' : 'Create Course' }}</button>
     </div>
     <div v-if="course">
         <ModuleList 
             :course="course" 
             :mode="'create'" 
-            :modules="modules" 
             @update-course="$emit('update-course', $event)"
             @module-clicked="$emit('module-clicked', $event)" />
     </div>
-    <div class="section pt-0">
-        <h2>Danger Zone</h2>
-        <button class="button is-danger" type="button" @click="deleteCourse">Delete Course</button>
+    <div v-if="course" class="section pt-0">
+        <h2 class="title">Danger Zone</h2>
+        <button class="button is-danger" type="button" @click="deleteCourse">
+            <span class="icon is-small">
+                <i class="fa fa-times-circle"></i>
+            </span>
+            <span>Delete Course</span>
+        </button>
     </div>
 </template>
 
@@ -39,25 +66,15 @@ export default {
     },
     data() {
         return {
-            updatedCourse: this.course || {}
+            updatedCourse: JSON.parse(JSON.stringify(this.course)) || {}
         };
     },
     props: {
-        course: Object,
-        modules: Array[Object]
+        course: Object
     },
     watch: {
-        course: {
-            immediate: true,
-            handler(newValue) {
-                if (newValue) {
-                    this.courseName = newValue.name;
-                    this.description = newValue.description;
-                } else {
-                    this.courseName = '';
-                    this.description = '';
-                }
-            }
+        course(newCourse) {
+            this.updatedCourse = JSON.parse(JSON.stringify(newCourse));
         }
     },
     computed: {

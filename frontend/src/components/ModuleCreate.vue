@@ -1,6 +1,30 @@
 <template>
     <div class="section">
-        <h1 class="title">Edit module - {{ module.name }}</h1>
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title">Edit module - {{ module.name }}</h1>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="buttons">
+                        <button class="button is-link" @click="$emit('go-to-course-create', course)">
+                            <span class="icon is-small">
+                                <i class="fa fa-chevron-left"></i>
+                            </span>
+                            <span>Back</span>
+                        </button>
+                        <button class="button is-primary" type="button" @click="saveModule">
+                            <span class="icon is-small">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span>Save Module</span>
+                        </button>
+                    </div>     
+                </div>
+            </div>
+        </div>
         <div class="field">
             <label class="label" for="moduleName">Module Name:</label>
             <div class="control">
@@ -13,10 +37,10 @@
                 <textarea class="textarea" id="description" v-model="updatedModule.description" required></textarea>
             </div>
         </div>
-        <button class="button is-primary" type="button" @click="saveModule">Save Module</button>
         <LessonList
             :course="course"
-            :module="module" />
+            :module="module"
+            @update-course="console.log('ModuleCreate update course emit'); $emit('update-course', $event)" />
     </div>
 </template>
 

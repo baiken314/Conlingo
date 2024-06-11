@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="content">
+    <div id="app">
         <NavbarComponent 
             :user="user"
             @learn-clicked="mode = 'learn'; state = 'courseList'"
@@ -15,32 +15,33 @@
                                 v-if="state == 'courseList'" 
                                 :courses="courses" 
                                 :mode="mode" 
-                                @course-clicked="state = 'moduleList'; selectedCourse = $event"
-                                @go-to-course-create="state = 'courseCreate'; selectedCourse = $event" />
+                                @course-clicked="loadSelectedCourse($event._id); state = 'moduleList'; "
+                                @go-to-course-create="state = 'courseCreate'; if ($event) loadSelectedCourse($event._id);" />
                             <ModuleList 
-                                v-if="state == 'moduleList'" 
-                                :course="selectedCourse" 
-                                :modules="modules"
+                                v-if="state == 'moduleList' && selectedCourse && selectedCourse.modules" 
+                                :course="selectedCourse"
                                 @go-to-course-list="state = 'courseList'"
                                 @module-clicked="state = 'lesson'; selectedModule = $event" />
                             <LessonComponent 
-                                v-if="state == 'lesson'" 
+                                v-if="state == 'lesson' && selectedLesson" 
                                 ref="lesson" 
                                 :lesson="selectedLesson"
-                                @back-to-course="state = 'moduleList'" />
+                                @go-to-module-list="state = 'moduleList'" />
                             <CourseCreate 
                                 v-if="state == 'courseCreate'"
-                                :course="selectedCourse" 
-                                :modules="modules"
-                                @update-course="selectedCourse = $event"
+                                :course="selectedCourse"
+                                @go-to-course-list="state = 'courseList'"
+                                @update-course="loadSelectedCourse($event._id)"
                                 @delete-course="state = 'courseList'; selectedCourse = null"
                                 @module-clicked="state = 'moduleCreate'; selectedModule = $event" />
                             <ModuleCreate 
                                 v-if="state == 'moduleCreate'"
                                 :course="selectedCourse"
                                 :module="selectedModule"
+                                @update-course="console.log('YTESSDGSD'); loadSelectedCourse($event._id)"
                                 @update-module="selectedModule = $event"
-                                @delete-module="state = 'courseCreate'; selectedModule = null" />
+                                @delete-module="state = 'courseCreate'; selectedModule = null"
+                                @go-to-course-create="state = 'courseCreate'; if ($event) loadSelectedCourse($event._id);" />
                         </div>
                     </div>
                 </div>
@@ -110,54 +111,42 @@ export default {
             user: null,
             courses: [],
             selectedCourse: null,
-            modules: [],
             selectedModule: null,
-            lessons: [],
             selectedLesson: null,
-            entries: null,
         };
     },
     async mounted() {
-        await this.loadCourses();
+        await this.loadSelectedCourses();
     },
     watch: {
-        async selectedCourse(newCourse) {
-            this.entries = [];
-            this.modules = [];
-            this.lessons = [];
-            if (!newCourse) return;
-
-            console.log('Selected course:', toRaw(newCourse));
-
-            const modulesRequest = await fetch(`https://conlingo-api.cake.builders/modules/course/${toRaw(newCourse)._id}/modules`);
-            this.modules = await modulesRequest.json();
-            const entriesRequest = await fetch(`https://conlingo-api.cake.builders/entries/${toRaw(newCourse)._id}`);
-            this.entries = await entriesRequest.json();
-        },
         async selectedModule(newModule) {
-            this.lessons = [];
             if (!newModule) return;
-
-            const lessonsRequest = await fetch(`https://conlingo-api.cake.builders/modules/${newModule._id}/lessons`);
-            this.lessons = await lessonsRequest.json();
-            this.selectedLesson = this.lessons[0];
+            this.selectedLesson = this.selectedCourse.modules.find(module => module._id == newModule._id).lessons[0];
         },
         user(newUser) {
-            console.log(`Setting new user data: ${newUser}`);
             document.cookie = newUser ? newUser._id : 'null';
-            console.log(`New document.cookie: ${document.cookie}`);
         },
         async state(newState) {
             if (newState == 'courseList') {
-                await this.loadCourses();
+                await this.loadSelectedCourses();
                 this.selectedCourse = null;
             }
         }
     },
     methods: {
-        async loadCourses() {
+        async loadSelectedCourses() {
             const coursesRequest = await fetch(`https://conlingo-api.cake.builders/courses`);
             this.courses = await coursesRequest.json();
+        },
+        async loadSelectedCourse(courseId) {
+            console.log('Loading course: ', courseId);
+            const courseRequest = await fetch(`https://conlingo-api.cake.builders/courses/${courseId}`);
+            const courseProxy = await courseRequest.json();
+            this.selectedCourse = toRaw(courseProxy);
+
+            if (this.selectedModule) {
+                this.selectedModule = this.selectedCourse.modules.find(module => module._id == this.selectedModule._id);
+            }
         }
     }
 };

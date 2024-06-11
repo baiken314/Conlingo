@@ -30,8 +30,18 @@
                 </div>
             </div>
             <div class="buttons">
-                <button class="button is-light" @click="login">Log In</button>
-                <button class="button is-primary" @click="signUp">Sign Up</button>
+                <button class="button is-light" @click="login">
+                    <span class="icon is-small">
+                        <i class="fa fa-sign-in"></i>
+                    </span>
+                    <span>Log In</span>
+                </button>
+                <button class="button is-primary" @click="signUp">
+                    <span class="icon is-small">
+                        <i class="fa fa-user-plus"></i>
+                    </span>
+                    <span>Sign Up</span>
+                </button>
             </div>
         </form>
     </section>
