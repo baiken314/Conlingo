@@ -18,9 +18,13 @@
     </div>
     <LessonItem 
         v-for="(lesson, index) in module.lessons"
-        :key="index"
-        :index="index"
-        :lesson="lesson" />
+            :key="index"
+            :index="index"
+            :course="course"
+            :module="module"
+            :lesson="lesson"
+            :entries="entries"
+            @update-course="$emit('update-course', $event)" />
 </template>
 
 <script>
@@ -32,7 +36,8 @@ export default {
     },
     props: {
         course: Object,
-        module: Object
+        module: Object,
+        entries: Array[Object]
     },
     methods: {
         async onCreateLesson() {

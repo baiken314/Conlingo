@@ -30,6 +30,7 @@
                             <CourseCreate 
                                 v-if="state == 'courseCreate'"
                                 :course="selectedCourse"
+                                :entries="entries"
                                 @go-to-course-list="state = 'courseList'"
                                 @update-course="loadSelectedCourse($event._id)"
                                 @delete-course="state = 'courseList'; selectedCourse = null"
@@ -38,7 +39,8 @@
                                 v-if="state == 'moduleCreate'"
                                 :course="selectedCourse"
                                 :module="selectedModule"
-                                @update-course="console.log('YTESSDGSD'); loadSelectedCourse($event._id)"
+                                :entries="entries"
+                                @update-course="loadSelectedCourse($event._id)"
                                 @update-module="selectedModule = $event"
                                 @delete-module="state = 'courseCreate'; selectedModule = null"
                                 @go-to-course-create="state = 'courseCreate'; if ($event) loadSelectedCourse($event._id);" />
@@ -113,10 +115,11 @@ export default {
             selectedCourse: null,
             selectedModule: null,
             selectedLesson: null,
+            entries: null
         };
     },
     async mounted() {
-        await this.loadSelectedCourses();
+        await this.loadCourses();
     },
     watch: {
         async selectedModule(newModule) {
@@ -128,13 +131,13 @@ export default {
         },
         async state(newState) {
             if (newState == 'courseList') {
-                await this.loadSelectedCourses();
+                await this.loadCourses();
                 this.selectedCourse = null;
             }
         }
     },
     methods: {
-        async loadSelectedCourses() {
+        async loadCourses() {
             const coursesRequest = await fetch(`https://conlingo-api.cake.builders/courses`);
             this.courses = await coursesRequest.json();
         },
@@ -147,6 +150,9 @@ export default {
             if (this.selectedModule) {
                 this.selectedModule = this.selectedCourse.modules.find(module => module._id == this.selectedModule._id);
             }
+
+            const entriesRequest = await fetch(`https://conlingo-api.cake.builders/entries/course/${this.selectedCourse._id}`);
+            this.entries = await entriesRequest.json();
         }
     }
 };

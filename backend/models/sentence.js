@@ -8,7 +8,7 @@ const sentenceSchema = new mongoose.Schema({
     acceptableNativeAnswers: { type: [String]}
 }, {
     toJSON: { virtuals: true },
-    toObject: { virtuals: true}
+    toObject: { virtuals: true }
 });
 
 sentenceSchema.virtual('cleanTargetText').get(function() {

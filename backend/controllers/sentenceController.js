@@ -1,6 +1,5 @@
 const Sentence = require('../models/sentence');
 
-// Controller functions for handling CRUD operations
 exports.getAllSentences = async (req, res) => {
     try {
         const sentences = await Sentence.find();

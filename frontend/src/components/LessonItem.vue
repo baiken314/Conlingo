@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div class="level-item">
-                    <button class="button is-primary is-small">
+                    <button class="button is-primary is-small" @click="onAddKeyword">
                         <span class="icon is-small">
                             <i class="fa fa-plus"></i>
                         </span>
@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <div class="level-item">
-                    <button class="button is-primary is-small">
+                    <button class="button is-primary is-small" @click="onAddSentence">
                         <span class="icon is-small">
                             <i class="fa fa-plus"></i>
                         </span>
@@ -59,10 +59,14 @@
         </div>
         <div v-else>
             <SentenceItem 
-                v-for="sentence in lesson.sentences"
+                v-for="sentence in sentences"
                 :key="sentence._id"
+                :course="course"
+                :module="module"
                 :lesson="lesson"
-                :sentence="sentence" />
+                :sentence="sentence"
+                :entries="entries"
+                @update-course="loadSentences(); $emit('update-course', $event)" />
         </div>
     </div>
 </template>
@@ -75,8 +79,31 @@ export default {
         SentenceItem
     },
     props: {
+        course: Object,
+        module: Object,
         lesson: Object,
-        index: Number
+        index: Number,
+        entries: Array[Object]
+    },
+    data() {
+        return {
+            sentences: []
+        }
+    },
+    mounted() {
+        this.loadSentences();
+    },
+    methods: {
+        async loadSentences() {
+            let sentenceResponse = await fetch(`https://conlingo-api.cake.builders/lessons/${this.lesson._id}/sentences`);
+            this.sentences = await sentenceResponse.json();
+        },
+        async onAddKeyword() {
+
+        },
+        async onAddSentence() {
+
+        }
     }
 }
 </script>

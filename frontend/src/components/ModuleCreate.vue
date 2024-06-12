@@ -40,7 +40,15 @@
         <LessonList
             :course="course"
             :module="module"
-            @update-course="console.log('ModuleCreate update course emit'); $emit('update-course', $event)" />
+            :entries="entries"
+            @update-course="$emit('update-course', $event)" />
+        <h2 class="title">Danger Zone</h2>
+        <button class="button is-danger" type="button" @click="deleteCourse">
+            <span class="icon is-small">
+                <i class="fa fa-times-circle"></i>
+            </span>
+            <span>Delete Module</span>
+        </button>
     </div>
 </template>
 
@@ -53,7 +61,8 @@ export default ({
     },
     props: {
         course: Object,
-        module: Object
+        module: Object,
+        entries: Array[Object]
     },
     data() {
         return {

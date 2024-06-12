@@ -70,31 +70,55 @@ exports.getSentencesByLessonId = async (req, res) => {
         let lessonObj = JSON.parse(JSON.stringify(lesson));
 
         for (let i = 0; i < lesson.sentences.length; i++) {
-            let sentence = lesson.sentences[i];
-            let targetHoverWords = {};
-            let entryWords = getWordsFromText(sentence.targetText);
-            
-            for (let entryWord of entryWords) {
-                let searchEntryWord = entryWord.replace(/[.,?:!;'"-]/g, '').toLowerCase();
-                let entry = await Entry.findOne({ entry: { $regex: `^${searchEntryWord}$`, $options: 'i' } });
-                if (entry) {
-                    while (entry.root) {
-                        entry = await Entry.findById(entry.root);
-                    }
-                    targetHoverWords[entryWord] = entry.translation;
-                } else {
-                    targetHoverWords[entryWord] = "N/A";
-                }
-                console.log(targetHoverWords);
-            }
-
-            lessonObj.sentences[i].targetHoverWords = targetHoverWords;
+            const hoverWords = await getHoverWords(lessonObj.sentences[i]);
+            lessonObj.sentences[i].targetHoverWords = hoverWords.targetHoverWords;
+            lessonObj.sentences[i].nativeHoverWords = hoverWords.nativeHoverWords;
         }
 
         res.json(lessonObj.sentences);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
+};
+
+const getHoverWords = async (sentence) => {
+    let targetHoverWords = {};
+    let nativeHoverWords = {};
+    let targetEntryWords = getWordsFromText(sentence.targetText);
+    let nativeEntryWords = getWordsFromText(sentence.nativeText);
+
+    for (let targetEntryWord of targetEntryWords) {
+        let searchEntryWord = targetEntryWord.replace(/[.,?:!;'"-]/g, '').toLowerCase();
+        let entry = await Entry.findOne({ entry: { $regex: `^${searchEntryWord}$`, $options: 'i' } });
+
+        if (entry) {
+            while (entry.root) {
+                entry = await Entry.findById(entry.root);
+            }
+            targetHoverWords[targetEntryWord] = entry.translation;
+        } else {
+            targetHoverWords[targetEntryWord] = "N/A";
+        }
+    }
+
+    for (let nativeEntryWord of nativeEntryWords) {
+        let searchEntryWord = nativeEntryWord.replace(/[.,?:!;'"-]/g, '').toLowerCase();
+        let entry = await Entry.findOne({ translation: { $regex: `^${searchEntryWord}$`, $options: 'i' } });
+
+        if (entry) {
+            while (entry.root) {
+                entry = await Entry.findById(entry.root);
+            }
+            nativeHoverWords[nativeEntryWord] = entry.entry;
+        } else {
+            nativeHoverWords[nativeEntryWord] = "N/A";
+        }
+    }
+
+    return {
+        targetHoverWords: targetHoverWords,
+        nativeHoverWords: nativeHoverWords
+    };
 };
 
 // break up targetText into words... parenthetic expressions are words

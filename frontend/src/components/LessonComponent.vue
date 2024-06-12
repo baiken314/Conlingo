@@ -5,11 +5,11 @@
                 <div class="level-item">
                     <progress class="progress is-primary" :value="currentIndex + (hasResponded && isResponseCorrect ? 1 : 0)" :max="sentences.length"></progress>
                 </div>
-                <div class="level-right">
-                    <div class="level-item">
+                <div class="level-right is-mobile">
+                    <!-- <div class="level-item is-mobile">
                         <span>{{ currentIndex  + (hasResponded && isResponseCorrect ? 1 : 0) }} / {{ sentences.length }}</span>
-                    </div>
-                    <div class="level-item">
+                    </div> -->
+                    <div class="level-item is-mobile">
                         <button class="button" @click="onBackClicked">
                             <span class="icon is-small">
                                 <i class="fa fa-times"></i>
